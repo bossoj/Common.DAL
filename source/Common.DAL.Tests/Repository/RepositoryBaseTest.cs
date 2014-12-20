@@ -1,6 +1,8 @@
-﻿using Common.DAL.EF;
+﻿using System.Configuration;
+using Common.DAL.EF;
 using Common.DAL.Interface;
 using FluentAssertions;
+using FluentAssertions.Common;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
@@ -24,8 +26,7 @@ namespace Common.DAL.Tests
         [TestInitialize]
         public void TestInitialize()
         {
-            string connectionString = @"Data Source=.\SQLEXPRESS;Initial Catalog=EFMigrationSample.BlogContextTest;" +
-                                      @"Integrated Security=True;Connect Timeout=15;Encrypt=False;TrustServerCertificate=False";
+            var connectionString = ConfigurationManager.AppSettings["SQLSERVER_URI"];
 
             dbContextFactory = new DbContextFactory(connectionString, s => new BlogContext(s));
             dbContextProvider = new ThreadDbContextProvider();

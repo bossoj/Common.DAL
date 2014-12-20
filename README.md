@@ -1,7 +1,7 @@
 Common Data Access Layer
 ==========
 
-Generic interface and implementation of the DAL (repository pattern, unit of work pattern) in C# .NET
+Generic interface and implementation (Entity Framework) of the DAL (repository pattern, unit of work pattern) in C# .NET
 
 
 Installation
@@ -34,7 +34,7 @@ List<Blog> blogList = new List<Blog>
     new Blog
     {
         Name = "Blog_1",
-        Rating = 5,
+        Rating = 8,
         Url = "blog_1.ru"
     },
     new Blog
