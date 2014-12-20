@@ -95,18 +95,21 @@
     <Compile Include="UnitOfWork\UnitOfWorkTest.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Common.DAL.Tests.dll.config">
+    <Content Include="Common.DAL.Tests.dll.config">
       <SubType>Designer</SubType>
       <TransformOnBuild>true</TransformOnBuild>
-    </None>
-    <None Include="Common.DAL.Tests.dll.Debug.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Common.DAL.Tests.dll.Debug.config">
       <DependentUpon>Common.DAL.Tests.dll.config</DependentUpon>
       <IsTransformFile>True</IsTransformFile>
-    </None>
-    <None Include="Common.DAL.Tests.dll.Release.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Common.DAL.Tests.dll.Release.config">
       <DependentUpon>Common.DAL.Tests.dll.config</DependentUpon>
       <IsTransformFile>True</IsTransformFile>
-    </None>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <None Include="packages.config" />
     <None Include="Properties\SlowCheetah\SlowCheetah.Transforms.targets" />
   </ItemGroup>
