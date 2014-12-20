@@ -139,12 +139,8 @@ namespace Common.DAL.Tests
             }
             catch (ConfigurationErrorsException)
             {
-                Console.WriteLine("Error reading app settings");
+                Console.WriteLine("Error reading connection settings");
             }
-
-            Console.WriteLine();
-            string connectionString = ConfigurationManager.AppSettings["SQLSERVER_CONNECTION_STRING"];
-            Console.WriteLine("SQLSERVER_CONNECTION_STRING - " + (connectionString ?? "Not Found"));
         }
 
         //------------------------------------------------------------------------------------------
