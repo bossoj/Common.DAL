@@ -23,7 +23,7 @@ namespace Common.DAL.Tests
         [TestInitialize]
         public void TestInitialize()
         {
-            var connectionString = ConfigurationManager.AppSettings["SQLSERVER_URI"];
+            var connectionString = ConfigurationManager.AppSettings["SQLSERVER_CONNECTION_STRING"];
 
             dbContextFactory = new DbContextFactory(connectionString, s => new BlogContext(s));
             dbContextProvider = new ThreadDbContextProvider();
