@@ -1,4 +1,5 @@
-﻿using System.Configuration;
+﻿using System;
+using System.Configuration;
 using System.Linq;
 using Common.DAL.EF;
 using Common.DAL.Interface;
@@ -24,27 +25,27 @@ namespace Common.DAL.Tests
         [TestInitialize]
         public void TestInitialize()
         {
-            var connectionString = ConfigurationManager.AppSettings["SQLSERVER_CONNECTION_STRING"];
+            //var connectionString = ConfigurationManager.AppSettings["SQLSERVER_CONNECTION_STRING"];
 
-            dbContextFactory = new DbContextFactory(connectionString, s => new BlogContext(s));
-            dbContextProvider = new ThreadDbContextProvider();
-            unitOfWorkFactory = new UnitOfWorkFactory(dbContextFactory, dbContextProvider);
-            repositoryBlog = new Repository<Blog>(dbContextProvider);
-            repositoryPost = new Repository<Post>(dbContextProvider);
+            //dbContextFactory = new DbContextFactory(connectionString, s => new BlogContext(s));
+            //dbContextProvider = new ThreadDbContextProvider();
+            //unitOfWorkFactory = new UnitOfWorkFactory(dbContextFactory, dbContextProvider);
+            //repositoryBlog = new Repository<Blog>(dbContextProvider);
+            //repositoryPost = new Repository<Post>(dbContextProvider);
 
-            TestCleanup();
+            //TestCleanup();
         }
 
         [TestCleanup]
         public void TestCleanup()
         {
-            using (var uow = unitOfWorkFactory.Create())
-            {
-                repositoryBlog.DeleteRange(repositoryBlog.GetAll());
-                repositoryPost.DeleteRange(repositoryPost.GetAll());
+            //using (var uow = unitOfWorkFactory.Create())
+            //{
+            //    repositoryBlog.DeleteRange(repositoryBlog.GetAll());
+            //    repositoryPost.DeleteRange(repositoryPost.GetAll());
 
-                uow.Commit();
-            }
+            //    uow.Commit();
+            //}
         }
 
         //======================================================================================
@@ -91,6 +92,61 @@ namespace Common.DAL.Tests
         };
 
         //======================================================================================
+
+        [TestMethod]
+        public void Test_Config()
+        {
+            Console.WriteLine("AppSettings:");
+            try
+            {
+                var appSettings = ConfigurationManager.AppSettings;
+
+                if (appSettings.Count == 0)
+                {
+                    Console.WriteLine("AppSettings is empty.");
+                }
+                else
+                {
+                    foreach (var key in appSettings.AllKeys)
+                    {
+                        Console.WriteLine("Key: {0} Value: {1}", key, appSettings[key]);
+                    }
+                }
+            }
+            catch (ConfigurationErrorsException)
+            {
+                Console.WriteLine("Error reading app settings");
+            }
+            Console.WriteLine();
+
+            Console.WriteLine("ConnectionStrings:");
+            try
+            {
+                var connectionStrings = ConfigurationManager.ConnectionStrings;
+
+                if (connectionStrings.Count == 0)
+                {
+                    Console.WriteLine("ConnectionStrings is empty.");
+                }
+                else
+                {
+                    for (int i = 0; i < connectionStrings.Count; i++)
+                    {
+                        ConnectionStringSettings cs = connectionStrings[i];
+                        Console.WriteLine("Cs: {0}", cs.ConnectionString);
+                    }
+                }
+            }
+            catch (ConfigurationErrorsException)
+            {
+                Console.WriteLine("Error reading app settings");
+            }
+
+            string connectionString = ConfigurationManager.AppSettings["SQLSERVER_CONNECTION_STRING"];
+            Console.WriteLine("SQLSERVER_CONNECTION_STRING - " + (connectionString ?? "Not Found"));
+        }
+
+        //------------------------------------------------------------------------------------------
 
         [TestMethod]
         public void Example_Base()
