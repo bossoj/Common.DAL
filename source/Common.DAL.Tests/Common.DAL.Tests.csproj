@@ -96,22 +96,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Common.DAL.Tests.dll.config">
-      <SubType>Designer</SubType>
-      <TransformOnBuild>true</TransformOnBuild>
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Common.DAL.Tests.dll.Debug.config">
-      <DependentUpon>Common.DAL.Tests.dll.config</DependentUpon>
-      <IsTransformFile>True</IsTransformFile>
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Common.DAL.Tests.dll.Release.config">
-      <DependentUpon>Common.DAL.Tests.dll.config</DependentUpon>
-      <IsTransformFile>True</IsTransformFile>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <None Include="packages.config" />
-    <None Include="Properties\SlowCheetah\SlowCheetah.Transforms.targets" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Common.DAL.EF\Common.DAL.EF.csproj">

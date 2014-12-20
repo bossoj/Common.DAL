@@ -3,15 +3,6 @@ Common Data Access Layer
 
 Generic interface and implementation (Entity Framework) of the DAL (repository pattern, unit of work pattern) in C# .NET
 
-
-Installation
-------------
-Download sources.
-
-License
-------------
-[Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)
-
 Example
 ------------
 
@@ -101,3 +92,10 @@ using (unitOfWorkFactory.Create())
 
 *  **Use current transaction**
 
+Installation
+------------
+Download sources.
+
+License
+------------
+[Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)
