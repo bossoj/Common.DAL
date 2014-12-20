@@ -133,7 +133,7 @@ namespace Common.DAL.Tests
                     for (int i = 0; i < connectionStrings.Count; i++)
                     {
                         ConnectionStringSettings cs = connectionStrings[i];
-                        Console.WriteLine("Cs: {0}", cs.ConnectionString);
+                        Console.WriteLine("Key: {0} Value: {1}", cs.Name, cs.ConnectionString);
                     }
                 }
             }
@@ -142,6 +142,7 @@ namespace Common.DAL.Tests
                 Console.WriteLine("Error reading app settings");
             }
 
+            Console.WriteLine();
             string connectionString = ConfigurationManager.AppSettings["SQLSERVER_CONNECTION_STRING"];
             Console.WriteLine("SQLSERVER_CONNECTION_STRING - " + (connectionString ?? "Not Found"));
         }
