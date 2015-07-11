@@ -145,9 +145,46 @@ namespace Common.DAL.Interface
         /// <returns>Найденные сущности</returns>
         [NotNull]
         IList<TEntity> Query(
-            [CanBeNull]Expression<Func<TEntity, bool>> filter,
-            bool noTracking = false,
+            [CanBeNull] Expression<Func<TEntity, bool>> filter,            
             [CanBeNull] Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null,
+            bool noTracking = false,
+            params Expression<Func<TEntity, object>>[] include);
+
+        /// <summary>
+        /// Запрос на получение сущностей из контекста
+        /// </summary>
+        /// <param name="filter">Условие отбора сущностей</param>
+        /// <param name="orderBy">Условие сортировки</param>
+        /// <param name="include">Сущности включаемые в результат запроса</param>
+        /// <returns>Найденные сущности</returns>
+        [NotNull]
+        IList<TEntity> Query(
+            [CanBeNull] Expression<Func<TEntity, bool>> filter,
+            [CanBeNull] Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null,
+            params Expression<Func<TEntity, object>>[] include);
+
+        /// <summary>
+        /// Запрос на получение сущностей из контекста
+        /// </summary>
+        /// <param name="filter">Условие отбора сущностей</param>
+        /// <param name="noTracking">Возвращаемые сущности не привязаны к сессии</param>
+        /// <param name="include">Сущности включаемые в результат запроса</param>
+        /// <returns>Найденные сущности</returns>
+        [NotNull]
+        IList<TEntity> Query(
+            [CanBeNull] Expression<Func<TEntity, bool>> filter,
+            bool noTracking = false,
+            params Expression<Func<TEntity, object>>[] include);
+
+        /// <summary>
+        /// Запрос на получение сущностей из контекста
+        /// </summary>
+        /// <param name="filter">Условие отбора сущностей</param>
+        /// <param name="include">Сущности включаемые в результат запроса</param>
+        /// <returns>Найденные сущности</returns>
+        [NotNull]
+        IList<TEntity> Query(
+            [CanBeNull] Expression<Func<TEntity, bool>> filter,
             params Expression<Func<TEntity, object>>[] include);
 
         /// <summary>

@@ -152,11 +152,10 @@ namespace Common.DAL.EF
             return query.LongCount();
         }
 
-
         public IList<TEntity> Query(
             Expression<Func<TEntity, bool>> filter, 
-            bool noTracking = false,
             Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null,
+            bool noTracking = false,
             params Expression<Func<TEntity, object>>[] include
             )
         {
@@ -189,6 +188,87 @@ namespace Common.DAL.EF
                 return query.ToList();
             }
         }
+
+        public IList<TEntity> Query(
+            Expression<Func<TEntity, bool>> filter, 
+            Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null, 
+            params Expression<Func<TEntity, object>>[] include)
+        {
+            IQueryable<TEntity> query = DbSet;
+
+            if (filter != null)
+            {
+                query = query.Where(filter);
+            }
+
+            if (include != null)
+            {
+                foreach (var includeExpression in include)
+                {
+                    query = query.Include(includeExpression);
+                }
+            }
+
+            if (orderBy != null)
+            {
+                return orderBy(query).ToList();
+            }
+            else
+            {
+                return query.ToList();
+            }
+        }
+
+        public IList<TEntity> Query(
+            Expression<Func<TEntity, bool>> filter, 
+            bool noTracking = false, 
+            params Expression<Func<TEntity, object>>[] include)
+        {
+            IQueryable<TEntity> query = DbSet;
+
+            if (noTracking)
+            {
+                query = query.AsNoTracking();
+            }
+
+            if (filter != null)
+            {
+                query = query.Where(filter);
+            }
+
+            if (include != null)
+            {
+                foreach (var includeExpression in include)
+                {
+                    query = query.Include(includeExpression);
+                }
+            }
+
+            return query.ToList();
+        }
+
+        public IList<TEntity> Query(
+            Expression<Func<TEntity, bool>> filter, 
+            params Expression<Func<TEntity, object>>[] include)
+        {
+            IQueryable<TEntity> query = DbSet;
+
+            if (filter != null)
+            {
+                query = query.Where(filter);
+            }
+
+            if (include != null)
+            {
+                foreach (var includeExpression in include)
+                {
+                    query = query.Include(includeExpression);
+                }
+            }
+
+            return query.ToList();
+        }
+
 
         public TEntity Query(Func<IQueryable<TEntity>, TEntity> callback, bool noTracking = false)
         {

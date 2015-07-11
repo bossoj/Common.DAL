@@ -95,7 +95,7 @@
     <Compile Include="UnitOfWork\UnitOfWorkTest.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Common.DAL.Tests.dll.config">
+    <Content Include="App.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <None Include="packages.config" />

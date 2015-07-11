@@ -183,8 +183,8 @@ namespace Common.DAL.Tests
                 // Act
                 var result = repositoryBlog.Query(
                     filter: q => q.Url != null,
-                    noTracking: true,
-                    orderBy:o => o.OrderBy(x => x.Rating)
+                    orderBy:o => o.OrderBy(x => x.Rating),
+                    noTracking: true
                     );
 
 
@@ -215,7 +215,6 @@ namespace Common.DAL.Tests
                 // Act
                 var result = repositoryBlog.Query(
                     filter: q => q.Name == "Blog",
-                    noTracking: false,
                     orderBy: o => o.OrderBy(x => x.Rating),
                     include: i => i.Posts
                     );
@@ -249,7 +248,6 @@ namespace Common.DAL.Tests
                 // Act
                 var result = repositoryBlog.Query(
                     filter: q => q.Name == "Blog",
-                    noTracking: false,
                     orderBy: o => o.OrderBy(x => x.Rating)
                     );
 

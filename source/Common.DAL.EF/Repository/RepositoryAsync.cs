@@ -85,8 +85,8 @@ namespace Common.DAL.EF
 
         public async Task<IList<TEntity>> QueryAsync(
             Expression<Func<TEntity, bool>> filter,
+            Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null,
             bool noTracking = false,
-            Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null, 
             params Expression<Func<TEntity, object>>[] include)
         {
             IQueryable<TEntity> query = DbSet;
@@ -117,6 +117,86 @@ namespace Common.DAL.EF
             {
                 return await query.ToListAsync();
             }
+        }
+
+        public async Task<IList<TEntity>> QueryAsync(
+            Expression<Func<TEntity, bool>> filter, 
+            Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null, 
+            params Expression<Func<TEntity, object>>[] include)
+        {
+            IQueryable<TEntity> query = DbSet;
+
+            if (filter != null)
+            {
+                query = query.Where(filter);
+            }
+
+            if (include != null)
+            {
+                foreach (var includeExpression in include)
+                {
+                    query = query.Include(includeExpression);
+                }
+            }
+
+            if (orderBy != null)
+            {
+                return await orderBy(query).ToListAsync();
+            }
+            else
+            {
+                return await query.ToListAsync();
+            }
+        }
+
+        public async Task<IList<TEntity>> QueryAsync(
+            Expression<Func<TEntity, bool>> filter, 
+            bool noTracking = false, 
+            params Expression<Func<TEntity, object>>[] include)
+        {
+            IQueryable<TEntity> query = DbSet;
+
+            if (noTracking)
+            {
+                query = query.AsNoTracking();
+            }
+
+            if (filter != null)
+            {
+                query = query.Where(filter);
+            }
+
+            if (include != null)
+            {
+                foreach (var includeExpression in include)
+                {
+                    query = query.Include(includeExpression);
+                }
+            }
+
+            return await query.ToListAsync();
+        }
+
+        public async Task<IList<TEntity>> QueryAsync(
+            Expression<Func<TEntity, bool>> filter, 
+            params Expression<Func<TEntity, object>>[] include)
+        {
+            IQueryable<TEntity> query = DbSet;
+
+            if (filter != null)
+            {
+                query = query.Where(filter);
+            }
+
+            if (include != null)
+            {
+                foreach (var includeExpression in include)
+                {
+                    query = query.Include(includeExpression);
+                }
+            }
+
+            return await query.ToListAsync();
         }
 
         public async Task<TEntity> QueryAsync(Func<IQueryable<TEntity>, Task<TEntity>> callback, bool noTracking = false)
