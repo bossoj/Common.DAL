@@ -162,9 +162,9 @@ namespace Common.DAL.Tests
                 long countBlogs = repositoryBlog.Count(filter: q => q.Rating > 5);
 
                 IList<Blog> blogsWithPosts = repositoryBlog.Query(
-                    filter: q => q.Url != null,
-                    noTracking: true,
+                    filter: q => q.Url != null,                    
                     orderBy: o => o.OrderBy(x => x.Rating),
+                    noTracking: true,
                     include: i => i.Posts
                     );
             }

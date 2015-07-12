@@ -18,6 +18,7 @@ namespace Common.DAL.Tests
             : base(existingConnection, contextOwnsConnection) { }
 
         public DbSet<Blog> Blogs { get; set; }
+
         public DbSet<Post> Posts { get; set; }
     }
 

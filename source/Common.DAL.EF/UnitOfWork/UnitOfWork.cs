@@ -1,8 +1,8 @@
 ﻿using Common.DAL.Interface;
 using JetBrains.Annotations;
-using System.Data;
 using System.Data.Entity;
 using System.Monads;
+using System.Transactions;
 
 namespace Common.DAL.EF
 {
@@ -13,36 +13,36 @@ namespace Common.DAL.EF
     {
         private readonly IDbContextProvider _dbContextProvider;
         private readonly DbContext _dbContext;
-        private readonly DbContextTransaction _transaction;
-        private readonly TransactionOption _scopeOption;
-        private readonly bool _isNested;
+        private readonly TransactionScope _transaction;       
 
         private bool _wasCommitted = false;
+        private bool _hasTransaction = false;
+        private bool _isNested = false;
 
         /// <summary>
         /// ctor
         /// </summary>
         /// <param name="dbContextProvider">Провайдер сессии EntityFramework</param>
         /// <param name="dbContext">Сессия EntityFramework</param>
-        /// <param name="scopeOption">Требование к транзакции</param>
         /// <param name="isolationLevel">Уровень изоляции (задает поведение при блокировке транзакции для подключения)</param>
-        /// <param name="isNested">Признак того, является ли еденица работы вложенная в другую</param>
-        public UnitOfWork([NotNull] IDbContextProvider dbContextProvider, [NotNull] DbContext dbContext, 
-            TransactionOption scopeOption = TransactionOption.New, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted,
-            bool isNested = false)
+        public UnitOfWork([NotNull] IDbContextProvider dbContextProvider, [NotNull] DbContext dbContext,
+            IsolationLevel isolationLevel = IsolationLevel.Serializable)
         {
             _dbContextProvider = dbContextProvider.CheckNull("dbContextProvider");
             _dbContext = dbContext.CheckNull("dbContext");
-            _isNested = isNested;
 
-            _scopeOption = scopeOption;
+            _isNested = !_dbContextProvider.IsEmpty && Transaction.Current != null;
 
             if (!_isNested)
             {
                 _dbContextProvider.CurrentDbContext = _dbContext;
 
-                if (_scopeOption == TransactionOption.New)
-                    _transaction = _dbContext.Database.BeginTransaction(isolationLevel);
+                if (Transaction.Current == null)
+                {
+                    _transaction = new TransactionScope(TransactionScopeOption.Required, new TransactionOptions { IsolationLevel = isolationLevel });
+
+                    _hasTransaction = true;
+                }
             }
         }
 
@@ -58,59 +58,34 @@ namespace Common.DAL.EF
                     "Пожалуйста, откройте новый сеанс через UnitOfWorkFactory.");
             }
 
-            if (_isNested)
+            ExceptionWrapper.WrapCall(() =>
             {
-                ExceptionWrapper.WrapCall(() =>
+                _dbContext.SaveChanges();
+
+                if (!_isNested)
                 {
-                    _dbContext.SaveChanges();
-                });
+                    if (_hasTransaction)
+                    {
+                        _transaction.Complete();
+                    }
 
-            }
-            else
-            {
-                ExceptionWrapper.WrapCall(() =>
-                {
-                    _dbContext.SaveChanges();
-
-                    if (_scopeOption == TransactionOption.New)
-                        _transaction.Commit();
-                });
-
-                _dbContextProvider.CurrentDbContext = null;
-            }
+                    _dbContextProvider.CurrentDbContext = null;
+                }
+            });
 
             _wasCommitted = true;
         }
-
-        /// <summary>
-        /// Откатить ВСЕ изменения в базе
-        /// </summary>
-        private void Rollback()
-        {
-            if (!_wasCommitted)
-            {
-                ExceptionWrapper.WrapCall(() =>
-                {
-                    if (_scopeOption == TransactionOption.New)
-                        _transaction.Rollback();
-                });  
-            }
-        }
-
         public void Dispose()
         {
             if (!_isNested)
             {
-                Rollback();
-
-                if (_scopeOption == TransactionOption.New)
+                if (_hasTransaction)
+                {
                     _transaction.Dispose();
+                }
 
                 _dbContextProvider.CurrentDbContext = null;
                 _dbContext.Dispose();
-
-                // Обнулим хранилище родительского UnitOfWork
-                UnitOfWorkFactory.CurrentParentUnitOfWork = null;
             }
         }
     }

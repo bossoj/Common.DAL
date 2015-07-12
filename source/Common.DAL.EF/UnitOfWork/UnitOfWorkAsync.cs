@@ -2,11 +2,11 @@
 using Common.Entity;
 using JetBrains.Annotations;
 using System;
-using System.Data;
 using System.Data.Entity;
 using System.Data.Entity.Infrastructure;
 using System.Monads;
 using System.Threading.Tasks;
+using System.Transactions;
 
 namespace Common.DAL.EF
 {
@@ -18,29 +18,30 @@ namespace Common.DAL.EF
         private readonly IDbContextFactory<DbContext> _dbContextFactory;
         private readonly IDbContextProvider _dbContextProvider;
         private readonly DbContext _dbContext;
-        private readonly DbContextTransaction _transaction;
-        private readonly TransactionOption _scopeOption;
+        private readonly TransactionScope _transaction;
 
         private bool _wasCommitted = false;
+        private bool _hasTransaction = false;
 
         /// <summary>
         /// ctor
         /// </summary>
         /// <param name="dbContextFactory">Провайдер сессии EntityFramework</param>
-        /// <param name="scopeOption">Требование к транзакции</param>
         /// <param name="isolationLevel">Уровень изоляции (задает поведение при блокировке транзакции для подключения)</param>
-        public UnitOfWorkAsync([NotNull] IDbContextFactory<DbContext> dbContextFactory, 
-            TransactionOption scopeOption = TransactionOption.New, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
+        public UnitOfWorkAsync([NotNull] IDbContextFactory<DbContext> dbContextFactory, IsolationLevel isolationLevel = IsolationLevel.Serializable)
         {
             _dbContextFactory = dbContextFactory.CheckNull("dbContextFactory");
             _dbContext = _dbContextFactory.Create();
 
-            _scopeOption = scopeOption;
+            _dbContextProvider = new TransientDbContextProvider { CurrentDbContext = _dbContext };
 
-            _dbContextProvider = new TransientDbContextProvider {CurrentDbContext = _dbContext};
+            if (Transaction.Current == null)
+            {
+                _transaction = new TransactionScope(TransactionScopeOption.Required,
+                    new TransactionOptions {IsolationLevel = isolationLevel}, TransactionScopeAsyncFlowOption.Enabled);
 
-            if (_scopeOption == TransactionOption.New)
-                _transaction = _dbContext.Database.BeginTransaction(isolationLevel);
+                _hasTransaction = true;
+            }
         }
 
         /// <summary>
@@ -59,8 +60,10 @@ namespace Common.DAL.EF
             {
                 await _dbContext.SaveChangesAsync();
 
-                if (_scopeOption == TransactionOption.New)
-                    _transaction.Commit();
+                if (_hasTransaction)
+                {
+                    _transaction.Complete();                    
+                }
             }
             catch (Exception ex)
             {
@@ -79,27 +82,12 @@ namespace Common.DAL.EF
             return new RepositoryAsync<TEntity>(_dbContextProvider);
         }
 
-        /// <summary>
-        /// Откатить ВСЕ изменения в базе
-        /// </summary>
-        private void Rollback()
-        {
-            if (!_wasCommitted)
-            {
-                ExceptionWrapper.WrapCall(() =>
-                {
-                    if (_scopeOption == TransactionOption.New)
-                        _transaction.Rollback();
-                });  
-            }
-        }
-
         public void Dispose()
         {
-            Rollback();
-
-            if (_scopeOption == TransactionOption.New)
+            if (_hasTransaction)
+            {
                 _transaction.Dispose();
+            }
 
             _dbContextProvider.CurrentDbContext = null;
             _dbContext.Dispose();

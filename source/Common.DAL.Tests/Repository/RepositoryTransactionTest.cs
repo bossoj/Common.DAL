@@ -1,10 +1,9 @@
-﻿using System.Configuration;
-using Common.DAL.EF;
+﻿using Common.DAL.EF;
 using Common.DAL.Interface;
 using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Data.Entity;
 using System.Data.Entity.Infrastructure;
 using System.Linq;
@@ -65,7 +64,7 @@ namespace Common.DAL.Tests
 
         //======================================================================================
 
-        List<Blog> blogList = new List<Blog>
+        private List<Blog> blogList = new List<Blog>
         {
             new Blog
             {
@@ -95,50 +94,23 @@ namespace Common.DAL.Tests
             {
                 Name = "Blog_5",
                 Rating = 1
-            }, 
+            },
             new Blog
             {
                 Name = "Blog_6",
                 Rating = 5
-            }             
+            }
         };
 
         //======================================================================================
 
         [TestMethod]
-        public void Test_With_Current_Transaction_Without_Complete()
-        {
-            // Arrange
-            using (new TransactionScope())
-            {
-                using (var unitOfWork = unitOfWorkFactory.Create(TransactionOption.Current))
-                {
-                    repositoryBlog.AddRange(blogList);
-                    unitOfWork.Commit();
-                }
-            }
-
-
-            using (unitOfWorkFactory.Create())
-            {
-                // Act
-                var result = repositoryBlog.Count();
-
-
-                // Assert
-                result.Should().Be(0, "Count() вернул не верное кол-во записей");
-            }
-        }
-
-        //------------------------------------------------------------------------------------------
-
-        [TestMethod]
-        public void Test_With_Current_Transaction_With_Complete_With_UnitOfWork_Commit()
+        public void Test_Transaction_With_Complete_With_UnitOfWork_Commit()
         {
             // Arrange
             using (var scope = new TransactionScope())
             {
-                using (var unitOfWork = unitOfWorkFactory.Create(TransactionOption.Current))
+                using (var unitOfWork = unitOfWorkFactory.Create())
                 {
                     repositoryBlog.AddRange(blogList);
                     unitOfWork.Commit();
@@ -147,13 +119,10 @@ namespace Common.DAL.Tests
                 scope.Complete();
             }
 
-
-
             using (unitOfWorkFactory.Create())
             {
                 // Act
                 var result = repositoryBlog.Count();
-
 
                 // Assert
                 result.Should().Be(blogList.LongCount(), "Count() вернул не верное кол-во записей");
@@ -163,12 +132,12 @@ namespace Common.DAL.Tests
         //------------------------------------------------------------------------------------------
 
         [TestMethod]
-        public void Test_With_Current_Transaction_With_Complete_Without_UnitOfWork_Commit()
+        public void Test_Transaction_With_Complete_Without_UnitOfWork_Commit()
         {
             // Arrange
             using (var scope = new TransactionScope())
             {
-                using (unitOfWorkFactory.Create(TransactionOption.Current))
+                using (unitOfWorkFactory.Create())
                 {
                     repositoryBlog.AddRange(blogList);
                 }
@@ -176,12 +145,10 @@ namespace Common.DAL.Tests
                 scope.Complete();
             }
 
-
             using (unitOfWorkFactory.Create())
             {
                 // Act
                 var result = repositoryBlog.Count();
-
 
                 // Assert
                 result.Should().Be(blogList.LongCount(), "Count() вернул не верное кол-во записей");
@@ -191,7 +158,7 @@ namespace Common.DAL.Tests
         //------------------------------------------------------------------------------------------
 
         [TestMethod]
-        public void Test_With_New_Transaction_Without_Complete()
+        public void Test_Transaction_Without_Complete()
         {
             // Arrange
             using (new TransactionScope())
@@ -208,6 +175,59 @@ namespace Common.DAL.Tests
                 // Act
                 var result = repositoryBlog.Count();
 
+                // Assert
+                result.Should().Be(0, "Count() вернул не верное кол-во записей");
+            }
+        }
+
+        //------------------------------------------------------------------------------------------
+
+        [TestMethod]
+        public async Task Test_Async_Transaction_With_Complete_With_UnitOfWork_Commit()
+        {
+            // Arrange
+            using (var scope = new TransactionScope())
+            {
+                using (var unitOfWork = unitOfWorkFactory.CreateAsync())
+                {
+                    var repository = unitOfWork.CreateRepository<Blog>();
+                    repository.AddRange(blogList);
+                    await unitOfWork.CommitAsync();
+                }
+
+                scope.Complete();
+            }
+
+            using (unitOfWorkFactory.Create())
+            {
+                // Act
+                var result = repositoryBlog.Count();
+
+                // Assert
+                result.Should().Be(blogList.LongCount(), "Count() вернул не верное кол-во записей");
+            }
+        }
+
+        //------------------------------------------------------------------------------------------
+
+        [TestMethod]
+        public async Task Test_Async_Transaction_Without_Complete()
+        {
+            // Arrange
+            using (new TransactionScope())
+            {
+                using (var unitOfWork = unitOfWorkFactory.CreateAsync())
+                {
+                    var repository = unitOfWork.CreateRepository<Blog>();
+                    repository.AddRange(blogList);
+                    await unitOfWork.CommitAsync();
+                }
+            }
+
+            using (unitOfWorkFactory.Create())
+            {
+                // Act
+                var result = repositoryBlog.Count();
 
                 // Assert
                 result.Should().Be(0, "Count() вернул не верное кол-во записей");
@@ -217,116 +237,172 @@ namespace Common.DAL.Tests
         //------------------------------------------------------------------------------------------
 
         [TestMethod]
-        public void Test_With_New_Transaction_With_Complete_Without_UnitOfWork_Commit()
+        public void Test_Async_Transaction_With_Complete_Without_UnitOfWork_Commit()
+        {
+            // Arrange
+            using (var scope = new TransactionScope())
+            {
+                using (var unitOfWork = unitOfWorkFactory.CreateAsync())
+                {
+                    var repository = unitOfWork.CreateRepository<Blog>();
+                    repository.AddRange(blogList);
+                }
+
+                scope.Complete();
+            }
+
+            using (unitOfWorkFactory.Create())
+            {
+                // Act
+                var result = repositoryBlog.Count();
+
+                // Assert
+                result.Should().Be(blogList.LongCount(), "Count() вернул не верное кол-во записей");
+            }
+        }
+
+        //------------------------------------------------------------------------------------------
+
+        [TestMethod]
+        public void Test_Transaction_UnitOfWork_With_Inner_UnitOfWork()
         {
             // Arrange
 
 
             // Act
-            Action act = () =>
+            using (var scope = new TransactionScope())
             {
-                using (var scope = new TransactionScope())
+                using (var unitOfWork = unitOfWorkFactory.Create())
                 {
-                    using (unitOfWorkFactory.Create())
+                    repositoryBlog.AddRange(blogList);
+
+                    using (var unitOfWorkInner = unitOfWorkFactory.Create())
                     {
                         repositoryBlog.AddRange(blogList);
+                        unitOfWorkInner.Commit(); //Not Transaction Commit(), only Flush()
                     }
 
-                    scope.Complete();
+                    unitOfWork.Commit(); //Transaction Commit()
                 }
-            };
 
+                scope.Complete();
+            }
 
             // Assert
-            act.ShouldThrow<TransactionAbortedException>("Не было вызвано исключение о том, что транзакция была прервана " +
-                                                         "'Запрос COMMIT TRANSACTION не имеет соответствующей инструкции BEGIN TRANSACTION.'");
+            using (unitOfWorkFactory.Create())
+            {
+                var result = repositoryBlog.GetAll();
+
+                result.Count.Should().Be(blogList.Count * 2, "GetAll() вернул не верное кол-во записей");
+            }
         }
 
         //------------------------------------------------------------------------------------------
 
         [TestMethod]
-        public async Task Test_Async_With_Current_Transaction_Without_Complete()
+        public void Test_Transaction_UnitOfWork_With_Inner_UnitOfWork_Without_Complete()
         {
             // Arrange
+
+
+            // Act
             using (new TransactionScope())
             {
-                using (var unitOfWork = unitOfWorkFactory.CreateAsync(TransactionOption.Current))
+                using (var unitOfWork = unitOfWorkFactory.Create())
                 {
-                    var repository = unitOfWork.CreateRepository<Blog>();
-                    repository.AddRange(blogList);
-                    await unitOfWork.CommitAsync();
+                    repositoryBlog.AddRange(blogList);
+
+                    using (var unitOfWorkInner = unitOfWorkFactory.Create())
+                    {
+                        repositoryBlog.AddRange(blogList);
+                        unitOfWorkInner.Commit(); //Not Transaction Commit(), only Flush()
+                    }
+
+                    unitOfWork.Commit(); //Transaction Commit()
                 }
             }
 
-
+            // Assert
             using (unitOfWorkFactory.Create())
             {
-                // Act
-                var result = repositoryBlog.Count();
+                var result = repositoryBlog.GetAll();
 
-
-                // Assert
-                result.Should().Be(0, "Count() вернул не верное кол-во записей");
+                result.Count.Should().Be(0, "GetAll() вернул не верное кол-во записей");
             }
         }
 
         //------------------------------------------------------------------------------------------
 
         [TestMethod]
-        public async Task Test_Async_With_Current_Transaction_With_Complete_With_UnitOfWork_Commit()
+        public async Task Test_Async_Transaction_UnitOfWorkAsync_With_Inner_UnitOfWorkAsync()
         {
             // Arrange
+
+
+            // Act
             using (var scope = new TransactionScope())
             {
-                using (var unitOfWork = unitOfWorkFactory.CreateAsync(TransactionOption.Current))
+                using (var unitOfWork = unitOfWorkFactory.CreateAsync())
                 {
                     var repository = unitOfWork.CreateRepository<Blog>();
-                    repository.AddRange(blogList);
+                    repository.Add(blogList.First());
+
+                    using (var unitOfWorkInner = unitOfWorkFactory.CreateAsync())
+                    {
+                        var repositoryInner = unitOfWorkInner.CreateRepository<Blog>();
+                        repositoryInner.Add(blogList.Last());
+                        await unitOfWorkInner.CommitAsync();
+                    }
+
                     await unitOfWork.CommitAsync();
                 }
 
                 scope.Complete();
             }
 
-
+            // Assert
             using (unitOfWorkFactory.Create())
             {
-                // Act
-                var result = repositoryBlog.Count();
+                var result = repositoryBlog.GetAll();
 
-
-                // Assert
-                result.Should().Be(blogList.LongCount(), "Count() вернул не верное кол-во записей");
+                result.Count.Should().Be(2, "GetAll() вернул не верное кол-во записей");
             }
         }
 
         //------------------------------------------------------------------------------------------
 
         [TestMethod]
-        public void Test_Async_With_Current_Transaction_With_Complete_Without_UnitOfWork_Commit()
+        public async Task Test_Async_Transaction_UnitOfWorkAsync_With_Inner_UnitOfWorkAsync_Without_Complete()
         {
             // Arrange
-            using (var scope = new TransactionScope())
+
+
+            // Act
+            using (new TransactionScope())
             {
-                using (var unitOfWork = unitOfWorkFactory.CreateAsync(TransactionOption.Current))
+                using (var unitOfWork = unitOfWorkFactory.CreateAsync())
                 {
                     var repository = unitOfWork.CreateRepository<Blog>();
-                    repository.AddRange(blogList);
-                }
+                    repository.Add(blogList.First());
 
-                scope.Complete();
+                    using (var unitOfWorkInner = unitOfWorkFactory.CreateAsync())
+                    {
+                        var repositoryInner = unitOfWorkInner.CreateRepository<Blog>();
+                        repositoryInner.Add(blogList.Last());
+                        await unitOfWorkInner.CommitAsync();
+                    }
+
+                    await unitOfWork.CommitAsync();
+                }
             }
 
-
+            // Assert
             using (unitOfWorkFactory.Create())
             {
-                // Act
-                var result = repositoryBlog.Count();
+                var result = repositoryBlog.GetAll();
 
-
-                // Assert
-                result.Should().Be(blogList.LongCount(), "Count() вернул не верное кол-во записей");
+                result.Count.Should().Be(0, "GetAll() вернул не верное кол-во записей");
             }
         }
-   }
+    }
 }

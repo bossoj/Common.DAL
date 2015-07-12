@@ -1,4 +1,5 @@
 ﻿using System.Configuration;
+using System.Linq;
 using Common.DAL.EF;
 using Common.DAL.Interface;
 using FluentAssertions;
@@ -228,17 +229,16 @@ namespace Common.DAL.Tests
             using (var unitOfWork = unitOfWorkFactory.CreateAsync())
             {
                 var repository = unitOfWork.CreateRepository<Blog>();
-                repository.AddRange(blogList);
-                Task commitTask = unitOfWork.CommitAsync();
+                repository.Add(blogList.First());
 
                 using (var unitOfWorkInner = unitOfWorkFactory.CreateAsync())
                 {
                     var repositoryInner = unitOfWorkInner.CreateRepository<Blog>();
-                    repositoryInner.AddRange(blogList);
+                    repositoryInner.Add(blogList.Last());
                     await unitOfWorkInner.CommitAsync();
-                }   
+                }
 
-                await commitTask;
+                await unitOfWork.CommitAsync();
             }
 
 
@@ -247,7 +247,7 @@ namespace Common.DAL.Tests
             {
                 var result = repositoryBlog.GetAll();
 
-                result.Count.Should().Be(blogList.Count * 2, "GetAll() вернул не верное кол-во записей");
+                result.Count.Should().Be(2, "GetAll() вернул не верное кол-во записей");
             }
         }
 
@@ -263,17 +263,16 @@ namespace Common.DAL.Tests
             using (var unitOfWork = unitOfWorkFactory.CreateAsync())
             {
                 var repository = unitOfWork.CreateRepository<Blog>();
-                repository.AddRange(blogList);
-                Task commitTask = unitOfWork.CommitAsync();
+                repository.Add(blogList.First());
 
                 using (var unitOfWorkInner = unitOfWorkFactory.CreateAsync())
                 {
                     var repositoryInner = unitOfWorkInner.CreateRepository<Blog>();
-                    repositoryInner.AddRange(blogList);
+                    repositoryInner.Add(blogList.Last());
 
-                }  //Not Rollback();
+                }  //Not Transaction Rollback(), Not Flush()
 
-                await commitTask;
+                await unitOfWork.CommitAsync();                
             }
 
 
@@ -282,8 +281,9 @@ namespace Common.DAL.Tests
             {
                 var result = repositoryBlog.GetAll();
 
-                result.Count.Should().Be(blogList.Count, "GetAll() вернул не верное кол-во записей");
+                result.Count.Should().Be(2, "GetAll() вернул не верное кол-во записей");
             }
         }
+
     }
 }

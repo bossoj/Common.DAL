@@ -10,7 +10,7 @@ namespace Common.DAL.EF
     {
         private static DbContext _dbContext;
 
-        public DbContext CurrentDbContext 
+        public DbContext CurrentDbContext
         {
             get
             {
@@ -19,17 +19,22 @@ namespace Common.DAL.EF
 
                 throw new DalEFException(
                     "Сессия не открыта. Логика доступа к базе данных не может быть использована." +
-                    "Пожалуйста, откройте сеанс явно через UnitOfWorkFactory." );
+                    "Пожалуйста, откройте сеанс явно через UnitOfWorkFactory.");
             }
             set
             {
                 if (value != null && _dbContext != null)
                     throw new DalEFException(
                     "Текущая сессия не закрыта. " +
-                    "Пожалуйста, закройте текущий сеанс явно через UnitOfWork.Commit() или UnitOfWork.Dispose().");                    
-                    
+                    "Пожалуйста, закройте текущий сеанс явно через UnitOfWork.Commit() или UnitOfWork.Dispose().");
+
                 _dbContext = value;
             }
+        }
+
+        public bool IsEmpty
+        {
+            get { return _dbContext == null; }
         }
     }
 }

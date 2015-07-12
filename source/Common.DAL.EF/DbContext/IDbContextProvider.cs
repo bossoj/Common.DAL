@@ -12,6 +12,11 @@ namespace Common.DAL.EF
         /// Текущая сессия 
         ///</summary>
         [CanBeNull]
-        DbContext CurrentDbContext { get; set; }    
+        DbContext CurrentDbContext { get; set; }
+
+        /// <summary>
+        /// Содержит ли активную сессию
+        /// </summary>
+        bool IsEmpty { get; }
     }
 }

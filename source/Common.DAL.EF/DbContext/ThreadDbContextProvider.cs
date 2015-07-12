@@ -33,5 +33,10 @@ namespace Common.DAL.EF
                 _dbContext = value;
             }
         }
+
+        public bool IsEmpty
+        {
+            get { return _dbContext == null; }
+        }
     }
 }

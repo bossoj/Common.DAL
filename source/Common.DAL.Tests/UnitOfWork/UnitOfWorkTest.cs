@@ -145,10 +145,10 @@ namespace Common.DAL.Tests
 
 
             // Act
-            using (var unitOfWork = unitOfWorkFactory.Create())
+            using (unitOfWorkFactory.Create())
             {
                 repositoryBlog.AddRange(blogList);
-            }
+            } // Not Commot
 
 
             // Assert
