@@ -11,11 +11,11 @@ Example
 ```csharp
 string connectionString = "...";
 
-dbContextFactory = new DbContextFactory(connectionString, s => new BlogContext(s));
-dbContextProvider = new ThreadDbContextProvider();
+IUnitOfWorkFactory dbContextFactory = new DbContextFactory(connectionString, s => new BlogContext(s));
+IDbContextProvider dbContextProvider = new ThreadDbContextProvider();
 
-unitOfWorkFactory = new UnitOfWorkFactory(dbContextFactory, dbContextProvider);
-repositoryBlog = new Repository<Blog>(dbContextProvider);
+IUnitOfWorkFactory unitOfWorkFactory = new UnitOfWorkFactory(dbContextFactory, dbContextProvider);
+IRepository<Blog> repositoryBlog = new Repository<Blog>(dbContextProvider);
 ```
 
 
@@ -53,12 +53,17 @@ using (unitOfWorkFactory.Create())
 
     long countBlogs = repositoryBlog.Count(filter: q => q.Rating > 5);
 
+    Blog mostPopularBlog = repositoryBlog.Query(
+        callback: q => q.Where(x => x.Url == null).OrderByDescending(x => x.Rating).First());
+
+    IList<Post> mostPopularPosts = repositoryBlog.Query(
+        callback: q => q.Where(x => x.Url == null).SelectMany( x => x.Posts).ToList());
+        
     IList<Blog> blogsWithPosts = repositoryBlog.Query(
-        filter: q => q.Url != null,
-        noTracking: true,
+        filter: q => q.Url != null,                    
         orderBy: o => o.OrderBy(x => x.Rating),
         include: i => i.Posts
-        );
+        );        
 }
 ```
 

@@ -25,15 +25,15 @@ namespace Common.DAL.Tests
         [TestInitialize]
         public void TestInitialize()
         {
-            //var connectionString = ConfigurationManager.AppSettings["SQLSERVER_CONNECTION_STRING"];
+            var connectionString = ConfigurationManager.AppSettings["SQLSERVER_CONNECTION_STRING"];
 
-            //dbContextFactory = new DbContextFactory(connectionString, s => new BlogContext(s));
-            //dbContextProvider = new ThreadDbContextProvider();
-            //unitOfWorkFactory = new UnitOfWorkFactory(dbContextFactory, dbContextProvider);
-            //repositoryBlog = new Repository<Blog>(dbContextProvider);
-            //repositoryPost = new Repository<Post>(dbContextProvider);
+            dbContextFactory = new DbContextFactory(connectionString, s => new BlogContext(s));
+            dbContextProvider = new ThreadDbContextProvider();
+            unitOfWorkFactory = new UnitOfWorkFactory(dbContextFactory, dbContextProvider);
+            repositoryBlog = new Repository<Blog>(dbContextProvider);
+            repositoryPost = new Repository<Post>(dbContextProvider);
 
-            //TestCleanup();
+            TestCleanup();
         }
 
         [TestCleanup]
@@ -164,9 +164,14 @@ namespace Common.DAL.Tests
                 IList<Blog> blogsWithPosts = repositoryBlog.Query(
                     filter: q => q.Url != null,                    
                     orderBy: o => o.OrderBy(x => x.Rating),
-                    noTracking: true,
                     include: i => i.Posts
                     );
+
+                Blog mostPopularBlog = repositoryBlog.Query(
+                    callback: q => q.Where(x => x.Url == null).OrderByDescending(x => x.Rating).First());
+
+                IList<Post> mostPopularPosts = repositoryBlog.Query(
+                    callback: q => q.Where(x => x.Url == null).SelectMany( x => x.Posts).ToList());
             }
         }
 
