@@ -1,11 +1,10 @@
-﻿using System.Configuration;
-using Common.DAL.EF;
+﻿using Common.DAL.EF;
 using Common.DAL.Interface;
 using FluentAssertions;
-using FluentAssertions.Common;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Data.Entity;
 using System.Data.Entity.Infrastructure;
 using System.Linq;
@@ -64,7 +63,7 @@ namespace Common.DAL.Tests
 
         //======================================================================================
 
-        readonly List<Blog> blogList = new List<Blog>
+        private readonly List<Blog> blogList = new List<Blog>
         {
             new Blog
             {
@@ -89,7 +88,7 @@ namespace Common.DAL.Tests
                 Name = "Blog_4",
                 Rating = 8,
                 Url = "blog_4.ru"
-            } 
+            }
         };
 
         //======================================================================================
@@ -102,10 +101,8 @@ namespace Common.DAL.Tests
                 // Arrange
                 repositoryBlog.AddRange(blogList);
 
-
                 // Act
                 var result = repositoryBlog.GetAll();
-
 
                 // Assert
                 result.Should().NotBeNull("GetAll() вернул Null");
@@ -123,18 +120,16 @@ namespace Common.DAL.Tests
             {
                 // Arrange;
                 string newName = "New_name";
-                repositoryBlog.Add(new Blog { Name = "Blog"});
-
+                repositoryBlog.Add(new Blog { Name = "Blog" });
 
                 // Act
                 repositoryBlog.GetAll().First().Name = newName;
 
                 var result = repositoryBlog.GetAll().First();
 
-
                 // Assert
                 result.Should().NotBeNull("GetAll() вернул Null");
-                result.Name.Should().Be( newName, "GetAll() вернул не привязанные к контексту записи");
+                result.Name.Should().Be(newName, "GetAll() вернул не привязанные к контексту записи");
             }
         }
 
@@ -149,12 +144,10 @@ namespace Common.DAL.Tests
                 string newName = "New_name";
                 repositoryBlog.Add(new Blog { Name = "Blog" });
 
-
                 // Act
                 repositoryBlog.GetAll(noTracking: true).First().Name = newName;
 
                 var result = repositoryBlog.GetAll().First();
-
 
                 // Assert
                 result.Should().NotBeNull("GetAll() вернул Null");
@@ -170,13 +163,11 @@ namespace Common.DAL.Tests
             using (unitOfWorkFactory.Create())
             {
                 // Arrange
-                Blog blog = new Blog {Name = "Blog"};
+                Blog blog = new Blog { Name = "Blog" };
                 repositoryBlog.Add(blog);
-
 
                 // Act
                 var result = repositoryBlog.Find(blog.BlogId);
-
 
                 // Assert
                 result.Should().NotBeNull("Find() вернул Null");
@@ -184,7 +175,7 @@ namespace Common.DAL.Tests
                 result.BlogId.Should().Be(blog.BlogId, "Find() вернул не верный объект");
             }
         }
-        
+
         //------------------------------------------------------------------------------------------
 
         [TestMethod]
@@ -194,10 +185,8 @@ namespace Common.DAL.Tests
             {
                 // Arrange
 
-
                 // Act
                 var result = repositoryBlog.Find(1);
-
 
                 // Assert
                 result.Should().BeNull("Find() вернул не Null");
@@ -212,14 +201,12 @@ namespace Common.DAL.Tests
             // Arrange
             Blog blog = new Blog { Name = "Blog" };
 
-
             // Act
             using (var unitOfWork = unitOfWorkFactory.Create())
             {
                 repositoryBlog.Add(blog);
                 unitOfWork.Commit();
             }
-
 
             // Assert
             using (unitOfWorkFactory.Create())
@@ -240,14 +227,12 @@ namespace Common.DAL.Tests
             Blog blog = new Blog { Name = "Blog" };
             Blog blog2 = new Blog { Name = "Blog2" };
 
-
             // Act
             using (var unitOfWork = unitOfWorkFactory.Create())
             {
-                repositoryBlog.AddRange(new [] { blog, blog2});
+                repositoryBlog.AddRange(new[] { blog, blog2 });
                 unitOfWork.Commit();
             }
-
 
             // Assert
             using (unitOfWorkFactory.Create())
@@ -268,14 +253,12 @@ namespace Common.DAL.Tests
             // Arrange
             Blog blog = new Blog { Name = "Blog" };
 
-
             // Act
             using (var unitOfWork = unitOfWorkFactory.Create())
             {
                 repositoryBlog.AddOrUpdate(blog);
                 unitOfWork.Commit();
             }
-
 
             // Assert
             using (unitOfWorkFactory.Create())
@@ -299,7 +282,6 @@ namespace Common.DAL.Tests
                 Blog newBlog = new Blog { Name = "Blog" };
                 repositoryBlog.Add(newBlog);
 
-
                 // Act
                 var blog = repositoryBlog.GetAll().First();
                 blog.Name = newName;
@@ -307,7 +289,6 @@ namespace Common.DAL.Tests
                 var count = repositoryBlog.AddOrUpdate(blog);
 
                 var result = repositoryBlog.GetAll().First();
-
 
                 // Assert
                 count.Should().Be(1, "AddOrUpdate() вернул не верное количество измененных/сохраненных объектов");
@@ -325,14 +306,12 @@ namespace Common.DAL.Tests
             Blog blog = new Blog { Name = "Blog" };
             Blog blog2 = new Blog { Name = "Blog2" };
 
-
             // Act
             using (var unitOfWork = unitOfWorkFactory.Create())
             {
                 repositoryBlog.AddOrUpdate(new[] { blog, blog2 });
                 unitOfWork.Commit();
             }
-
 
             // Assert
             using (unitOfWorkFactory.Create())
@@ -357,7 +336,6 @@ namespace Common.DAL.Tests
                 Blog newBlog = new Blog { Name = "Blog" };
                 repositoryBlog.Add(newBlog);
 
-
                 // Act
                 var blog = repositoryBlog.GetAll().First();
                 blog.Name = newName;
@@ -365,7 +343,6 @@ namespace Common.DAL.Tests
                 var count = repositoryBlog.AddOrUpdate(blog, b => b.Name);
 
                 var result = repositoryBlog.GetAll();
-
 
                 // Assert
                 count.Should().Be(1, "AddOrUpdate() вернул не верное количество измененных/сохраненных объектов");
@@ -385,7 +362,6 @@ namespace Common.DAL.Tests
                 Blog newBlog = new Blog { Name = "Blog" };
                 repositoryBlog.Add(newBlog);
 
-
                 // Act
                 var blog = repositoryBlog.GetAll().First();
                 blog.Name = newName;
@@ -393,7 +369,6 @@ namespace Common.DAL.Tests
                 var count = repositoryBlog.AddOrUpdate(blog, b => b.BlogId);
 
                 var result = repositoryBlog.GetAll();
-
 
                 // Assert
                 count.Should().Be(1, "AddOrUpdate() вернул не верное количество измененных/сохраненных объектов");
@@ -415,7 +390,6 @@ namespace Common.DAL.Tests
                 Blog newBlog = new Blog { Name = "Blog" };
                 repositoryBlog.Add(newBlog);
 
-
                 // Act
                 var blog = repositoryBlog.GetAll().First();
                 blog.Name = newName;
@@ -423,7 +397,6 @@ namespace Common.DAL.Tests
                 var count = repositoryBlog.Update(blog);
 
                 var result = repositoryBlog.GetAll().First();
-
 
                 // Assert
                 count.Should().Be(1, "Update() вернул не верное количество измененных/сохраненных объектов");
@@ -441,13 +414,11 @@ namespace Common.DAL.Tests
                 // Arrange
                 Blog blog = new Blog { Name = "Blog" };
 
-
                 // Act
-                Action act = () => repositoryBlog.Update(blog); 
-
+                Action act = () => repositoryBlog.Update(blog);
 
                 // Assert
-                act.ShouldThrow<DbUpdateConcurrencyException>("Не было вызвано исключение о том, что невозможно обновить запись");
+                act.Should().Throw<DbUpdateConcurrencyException>("Не было вызвано исключение о том, что невозможно обновить запись");
             }
         }
 
@@ -463,16 +434,14 @@ namespace Common.DAL.Tests
                 Blog newBlog = new Blog { Name = "Blog" };
                 repositoryBlog.Add(newBlog);
 
-
                 // Act
                 var blog = repositoryBlog.GetAll(noTracking: true).First();
                 blog.Name = newName;
 
                 Action act = () => repositoryBlog.Update(blog);
 
-
                 // Assert
-                act.ShouldThrow<InvalidOperationException>("Не было вызвано исключение о том, что невозможно обновить запись");
+                act.Should().Throw<InvalidOperationException>("Не было вызвано исключение о том, что невозможно обновить запись");
             }
         }
 
@@ -490,14 +459,12 @@ namespace Common.DAL.Tests
                 unitOfWork.Commit();
             }
 
-
             using (unitOfWorkFactory.Create())
             {
                 // Act
                 var count = repositoryBlog.Delete(blog);
 
                 var result = repositoryBlog.GetAll();
-
 
                 // Assert
                 count.Should().Be(1, "Delete() вернул не верное количество удаленных объектов");
@@ -515,13 +482,11 @@ namespace Common.DAL.Tests
                 // Arrange
                 Blog blog = new Blog { Name = "Blog" };
 
-
                 // Act
                 Action act = () => repositoryBlog.Delete(blog);
 
-
                 // Assert
-                act.ShouldThrow<DbUpdateConcurrencyException>("Не было вызвано исключение о том, что невозможно удалить запись");
+                act.Should().Throw<DbUpdateConcurrencyException>("Не было вызвано исключение о том, что невозможно удалить запись");
             }
         }
 
@@ -533,17 +498,15 @@ namespace Common.DAL.Tests
             using (unitOfWorkFactory.Create())
             {
                 // Arrange
-                Blog blog = new Blog {Name = "Blog"};
-                Blog blog2 = new Blog {Name = "Blog2"};
+                Blog blog = new Blog { Name = "Blog" };
+                Blog blog2 = new Blog { Name = "Blog2" };
 
-                repositoryBlog.AddRange(new[] {blog, blog2});
-
+                repositoryBlog.AddRange(new[] { blog, blog2 });
 
                 // Act
                 var count = repositoryBlog.DeleteRange(new[] { blog, blog2 });
 
                 var result = repositoryBlog.GetAll();
-
 
                 // Assert
                 count.Should().Be(2, "DeleteRange() вернул не верное количество удаленных объектов");
@@ -565,12 +528,10 @@ namespace Common.DAL.Tests
 
                 repositoryBlog.AddRange(new[] { blog, blog2, blog3 });
 
-
                 // Act
-                var count = repositoryBlog.DeleteAll( x => x.Rating == 1);
+                var count = repositoryBlog.DeleteAll(x => x.Rating == 1);
 
                 var result = repositoryBlog.GetAll();
-
 
                 // Assert
                 count.Should().Be(2, "DeleteAll() вернул не верное количество удаленных объектов");
@@ -587,14 +548,12 @@ namespace Common.DAL.Tests
             Blog blog = new Blog { Name = "Blog" };
             Blog blog2 = new Blog { Name = "Blog2" };
 
-
             // Act
             using (var unitOfWork = unitOfWorkFactory.Create())
             {
                 repositoryBlog.AddRange(new[] { blog, blog2 });
                 unitOfWork.Commit();
             }
-
 
             // Assert
             using (unitOfWorkFactory.Create())
@@ -615,14 +574,12 @@ namespace Common.DAL.Tests
             Blog blog2 = new Blog { Name = "Blog2", Rating = 1 };
             Blog blog3 = new Blog { Name = "Blog3", Rating = 2 };
 
-
             // Act
             using (var unitOfWork = unitOfWorkFactory.Create())
             {
                 repositoryBlog.AddRange(new[] { blog, blog2, blog3 });
                 unitOfWork.Commit();
             }
-
 
             // Assert
             using (unitOfWorkFactory.Create())
@@ -645,7 +602,6 @@ namespace Common.DAL.Tests
                 int pageNumber = 2;
                 int pageSize = 2;
 
-
                 // Act
                 var result = repositoryBlog.Paged(
                     pageNumber: pageNumber,
@@ -654,13 +610,11 @@ namespace Common.DAL.Tests
                     orderBy: o => o.OrderBy(x => x.BlogId)
                     );
 
-
                 // Assert
                 result.Should().NotBeNull("Paged() вернул Null");
                 result.Count.Should().Be(pageSize, "Paged() вернул не верное кол-во записей");
                 result.First().BlogId.Should().Be(blogList.OrderBy(x => x.BlogId).Skip((pageNumber - 1) * pageSize).Take(pageSize).First().BlogId,
                     "Paged() вернул не верную запись");
-
             }
         }
 
@@ -678,12 +632,10 @@ namespace Common.DAL.Tests
 
                 repositoryBlog.AddRange(new[] { blog, blog2, blog3 });
 
-
                 // Act
                 var count = repositoryBlog.DeleteImmediately(x => x.Rating == 1);
 
                 var result = repositoryBlog.GetAll();
-
 
                 // Assert
                 count.Should().Be(2, "DeleteImmediately() вернул не верное количество удаленных объектов");
@@ -705,12 +657,10 @@ namespace Common.DAL.Tests
 
                 repositoryBlog.AddRange(new[] { blog, blog2, blog3 });
 
-
                 // Act
                 var count = repositoryBlog.UpdateImmediately(x => x.Rating == 1, b => new Blog { Rating = 2 });
 
-                var result = repositoryBlog.Query( x => x.Rating == 2);
-
+                var result = repositoryBlog.Query(x => x.Rating == 2);
 
                 // Assert
                 count.Should().Be(2, "UpdateImmediately() вернул не верное количество обновленных объектов");

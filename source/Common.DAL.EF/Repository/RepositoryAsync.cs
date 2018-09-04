@@ -43,11 +43,11 @@ namespace Common.DAL.EF
             return await DbSet.FindAsync(id);
         }
 
-        public Task<int> AddRangeAsync(IEnumerable<TEntity> entities)
+        public async Task<int> AddRangeAsync(IEnumerable<TEntity> entities)
         {
             DbSet.AddRange(entities);
 
-            return DbContext.SaveChangesAsync();
+            return await DbContext.SaveChangesAsync();
         }
 
         public async Task<int> AddOrUpdateAsync(TEntity[] entities)
